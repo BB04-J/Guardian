@@ -1,0 +1,95 @@
+version: "3.9"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AI Response Guardian — Full Stack
+#  Services:
+#    backend  → Node.js REST + WebSocket API      :4000
+#    frontend → Next.js dashboard                  :3000
+#    proxy    → Python mitmproxy intercept engine  :8080
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Backend (PRD 2) ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: guardian-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT:             4000
+      NODE_ENV:         production
+      JWT_SECRET:       ${JWT_SECRET:-change_me_in_production_64_chars_min}
+      PROXY_SECRET_KEY: ${PROXY_SECRET_KEY:-change_me_shared_secret_32_chars}
+      DB_PATH:          /app/data/guardian.db
+      FRONTEND_URL:     http://localhost:3000
+    volumes:
+      - guardian_db:/app/data
+    healthcheck:
+      test:     ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+      start_period: 10s
+    networks:
+      - guardian
+
+  # ── Frontend (PRD 1) ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api
+        NEXT_PUBLIC_WS_URL:  ws://localhost:4000/ws/events
+    container_name: guardian-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - guardian
+
+  # ── Proxy Engine (PRD 3) ─────────────────────────────────────────────────────
+  proxy:
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    container_name: guardian-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"     # HTTP/HTTPS transparent proxy
+    environment:
+      PROXY_SECRET_KEY: ${PROXY_SECRET_KEY:-change_me_shared_secret_32_chars}
+      BACKEND_URL:      http://backend:4000
+      PROXY_HOST:       0.0.0.0
+      PROXY_PORT:       "8080"
+      POLICY_THRESHOLD: ${POLICY_THRESHOLD:-warn}
+      DRY_RUN:          ${DRY_RUN:-0}
+      LOG_LEVEL:        ${LOG_LEVEL:-INFO}
+    volumes:
+      - mitmproxy_ca:/root/.mitmproxy   # persist generated CA cert
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - guardian
+
+# ── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  guardian_db:
+    driver: local
+  mitmproxy_ca:
+    driver: local
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  guardian:
+    driver: bridge
