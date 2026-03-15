@@ -52,12 +52,10 @@ def main() -> None:
     if args.log_level:
         os.environ["LOG_LEVEL"] = args.log_level.upper()
 
-    print(f"""
-  ╔══════════════════════════════════════════════╗
-  ║   AI Response Guardian — Proxy Engine v1.0   ║
-  ║   Starting on {args.host}:{args.port:<5}                ║
-  ╚══════════════════════════════════════════════╝
-""")
+    print("-" * 50)
+    print(f"  AI Response Guardian — Proxy Engine v1.0")
+    print(f"  Starting on {args.host}:{args.port}")
+    print("-" * 50)
 
     try:
         from mitmproxy.tools import main as mitmproxy_main

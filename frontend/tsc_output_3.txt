@@ -1,0 +1,26 @@
+﻿app/incidents/[id]/page.tsx(45,26): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<RiskLevel, { label: string; color: string; bg: string; dot: string; border: string; }>'.
+app/policies/page.tsx(74,5): error TS2322: Type '({ platform, enable }: { platform: string; enable: boolean; policyId?: string; }) => Promise<AxiosResponse<any, any, {}>> | Promise<{ data: null; }>' is not assignable to type 'MutationFunction<AxiosResponse<any, any, {}>, { platform: string; enable: boolean; policyId?: string | undefined; }>'.
+  Type 'Promise<AxiosResponse<any, any, {}>> | Promise<{ data: null; }>' is not assignable to type 'Promise<AxiosResponse<any, any, {}>>'.
+    Type 'Promise<{ data: null; }>' is not assignable to type 'Promise<AxiosResponse<any, any, {}>>'.
+      Type '{ data: null; }' is missing the following properties from type 'AxiosResponse<any, any, {}>': status, statusText, headers, config
+components/charts/IncidentTimeline.tsx(8,15): error TS2305: Module '"@/types"' has no exported member 'TimelinePoint'.
+components/incidents/IncidentDetail.tsx(47,44): error TS2551: Property 'aiPlatform' does not exist on type 'Incident'. Did you mean 'ai_platform'?
+components/incidents/IncidentDetail.tsx(50,42): error TS2551: Property 'riskLevel' does not exist on type 'Incident'. Did you mean 'risk_level'?
+components/incidents/IncidentDetail.tsx(50,69): error TS2551: Property 'riskLevel' does not exist on type 'Incident'. Did you mean 'risk_level'?
+components/incidents/IncidentDetail.tsx(59,16): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<AIPlatform, string>'.
+components/incidents/IncidentDetail.tsx(59,41): error TS2551: Property 'aiPlatform' does not exist on type 'Incident'. Did you mean 'ai_platform'?
+components/incidents/IncidentDetail.tsx(73,53): error TS2339: Property 'userName' does not exist on type 'Incident'.
+components/incidents/IncidentDetail.tsx(74,53): error TS2551: Property 'userId' does not exist on type 'Incident'. Did you mean 'user_id'?
+components/incidents/IncidentDetail.tsx(76,44): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<AIPlatform, string>'.
+components/incidents/IncidentDetail.tsx(76,69): error TS2551: Property 'aiPlatform' does not exist on type 'Incident'. Did you mean 'ai_platform'?
+components/incidents/IncidentDetail.tsx(77,53): error TS2551: Property 'deviceId' does not exist on type 'Incident'. Did you mean 'device_id'?
+components/incidents/IncidentDetail.tsx(85,71): error TS2551: Property 'riskLevel' does not exist on type 'Incident'. Did you mean 'risk_level'?
+components/incidents/IncidentDetail.tsx(89,25): error TS2551: Property 'threatTypes' does not exist on type 'Incident'. Did you mean 'threat_types'?
+components/incidents/IncidentDetail.tsx(93,29): error TS2551: Property 'threatTypes' does not exist on type 'Incident'. Did you mean 'threat_types'?
+components/incidents/IncidentDetail.tsx(93,45): error TS7006: Parameter 't' implicitly has an 'any' type.
+components/incidents/IncidentDetail.tsx(108,25): error TS2551: Property 'promptPreview' does not exist on type 'Incident'. Did you mean 'prompt_preview'?
+components/incidents/IncidentDetail.tsx(120,25): error TS2551: Property 'responsePreview' does not exist on type 'Incident'. Did you mean 'response_preview'?
+components/incidents/IncidentDetail.tsx(136,44): error TS2339: Property 'userName' does not exist on type 'Incident'.
+components/ui/ActionBadge.tsx(3,15): error TS2305: Module '"@/types"' has no exported member 'Action'.
+components/ui/PlatformIcon.tsx(5,7): error TS2739: Type '{ chatgpt: string; claude: string; gemini: string; copilot: string; other: string; }' is missing the following properties from type 'Record<AIPlatform, string>': mistral, groq
+components/ui/PlatformIcon.tsx(13,7): error TS2739: Type '{ chatgpt: string; claude: string; gemini: string; copilot: string; other: string; }' is missing the following properties from type 'Record<AIPlatform, string>': mistral, groq

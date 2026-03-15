@@ -21,19 +21,47 @@ import json
 import logging
 import threading
 import time
-from typing import Optional
+import sys
+from pathlib import Path
+
+# Add project root to sys.path so we can import modules correctly under mitmproxy
+_root = str(Path(__file__).parent.parent)
+if _root not in sys.path:
+    sys.path.append(_root)
 
 from mitmproxy import ctx, http
 
-from .config import Config
-from .platforms import (
-    extract_prompt_from_body,
-    extract_response_text,
-    identify_platform,
-    is_inference_request,
-)
-from .reporter import GuardianReporter, IncidentPayload
-from .scanner import scan_full, scan_prompt, scan_response
+try:
+    from guardian_proxy.config import Config
+    from guardian_proxy.platforms import (
+        extract_prompt_from_body,
+        extract_response_text,
+        identify_platform,
+        is_inference_request,
+    )
+    from guardian_proxy.reporter import GuardianReporter, IncidentPayload
+    from guardian_proxy.scanner import scan_full, scan_prompt, scan_response
+except ImportError:
+    # Fallback if started without package context
+    try:
+        from config import Config
+        from platforms import (
+            extract_prompt_from_body,
+            extract_response_text,
+            identify_platform,
+            is_inference_request,
+        )
+        from reporter import GuardianReporter, IncidentPayload
+        from scanner import scan_full, scan_prompt, scan_response
+    except ImportError:
+        # One more try — if we are in guardian_proxy dir
+        import config as Config
+        import platforms
+        import reporter
+        import scanner
+        from platforms import extract_prompt_from_body, extract_response_text, identify_platform, is_inference_request
+        from reporter import GuardianReporter, IncidentPayload
+        from scanner import scan_full, scan_prompt, scan_response
 
 import urllib.request
 import urllib.error
