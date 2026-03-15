@@ -1,21 +1,57 @@
-"use client";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+'use client'
 
-const COLORS = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e", safe: "#3b82f6" };
+import React from 'react'
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
+import type { Incident } from '@/types'
 
-interface Props { data: { type: string; count: number }[] }
+interface Props { incidents: Incident[] }
 
-export function RiskDistribution({ data }: Props) {
-  const pie = data.map((d) => ({ name: d.type.replace(/_/g, " "), value: d.count, fill: COLORS[d.type as keyof typeof COLORS] ?? "#475569" }));
+const COLORS: Record<string, string> = {
+  critical: '#ef4444',
+  high:     '#f97316',
+  medium:   '#eab308',
+  low:      '#22c55e',
+  safe:     '#3b82f6',
+}
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null
+  const { name, value } = payload[0]
   return (
-    <ResponsiveContainer width="100%" height={180}>
+    <div className="ag-card px-3 py-2 text-xs font-mono">
+      <span className="capitalize text-white/70">{name}: </span>
+      <span className="text-white font-semibold">{value}</span>
+    </div>
+  )
+}
+
+export function RiskDistribution({ incidents }: Props) {
+  const counts: Record<string, number> = {}
+  incidents.forEach(i => { counts[i.risk_level] = (counts[i.risk_level] ?? 0) + 1 })
+  const data = Object.entries(counts).map(([name, value]) => ({ name, value }))
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={pie} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
-          {pie.map((entry, i) => <Cell key={i} fill={entry.fill} stroke="transparent" />)}
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius="55%"
+          outerRadius="75%"
+          paddingAngle={3}
+          dataKey="value"
+        >
+          {data.map((entry) => (
+            <Cell key={entry.name} fill={COLORS[entry.name] ?? '#888'} stroke="transparent" />
+          ))}
         </Pie>
-        <Tooltip contentStyle={{ background: "#0d1424", border: "1px solid #1e2d45", borderRadius: 6, fontSize: 11, fontFamily: "var(--font-geist-mono)" }} />
-        <Legend wrapperStyle={{ fontSize: 10, fontFamily: "var(--font-geist-mono)" }} />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend
+          wrapperStyle={{ fontSize: '9px', fontFamily: 'JetBrains Mono', color: 'rgba(255,255,255,0.4)' }}
+          formatter={(val) => <span className="capitalize text-white/50">{val}</span>}
+        />
       </PieChart>
     </ResponsiveContainer>
-  );
+  )
 }

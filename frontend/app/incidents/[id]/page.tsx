@@ -42,7 +42,7 @@ export default function IncidentDetailPage() {
   });
 
   const related = relatedRaw?.filter((i: { id: string }) => i.id !== id).slice(0, 5) ?? [];
-  const cfg = incident ? RISK_CONFIG[incident.risk_level] : null;
+  const cfg = incident ? RISK_CONFIG[incident.risk_level as keyof typeof RISK_CONFIG] : null;
 
   if (isLoading) {
     return (

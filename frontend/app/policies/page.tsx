@@ -72,7 +72,7 @@ export default function PoliciesPage() {
   // Create / remove a platform_allow policy for a given platform id
   const whitelistToggle = useMutation({
     mutationFn: ({ platform, enable }: { platform: string; enable: boolean; policyId?: string }) => {
-      if (!enable) return Promise.resolve({ data: null });
+      if (!enable) return Promise.resolve({ data: null } as any);
       return createPolicy({
         name:      `Trusted Platform: ${platform}`,
         pattern:   platform,

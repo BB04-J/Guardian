@@ -1,5 +1,10 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { RiskLevel, AIPlatform } from "@/types";
-import clsx from "clsx";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export const RISK_CONFIG: Record<RiskLevel, { label: string; color: string; bg: string; dot: string; border: string }> = {
   critical: { label: "Critical", color: "text-red-400", bg: "bg-red-950/60", dot: "bg-red-500", border: "border-red-800/60" },
@@ -58,4 +63,12 @@ export function formatTs(ts: string): string {
   return new Date(ts).toLocaleString("en-IN", {
     day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit",
   });
+}
+
+export function formatTime(ts: string): string {
+  return new Date(ts).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+export function formatDate(ts: string): string {
+  return new Date(ts).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }

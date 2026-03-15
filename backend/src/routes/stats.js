@@ -7,7 +7,7 @@ const router = express.Router();
 // GET /api/stats/summary
 // Powers the top stat cards on the dashboard
 router.get('/summary', authMiddleware, (req, res) => {
-  const today = new Date().toISOString().split('T')[0] + 'T00:00:00';
+  const today = new Date().toISOString().split('T')[0] + ' 00:00:00';
 
   const totalToday = db.prepare(
     `SELECT COUNT(*) as c FROM incidents WHERE timestamp >= ?`
@@ -45,11 +45,13 @@ router.get('/summary', authMiddleware, (req, res) => {
 // Powers the line chart — incidents per hour broken down by risk level
 router.get('/timeline', authMiddleware, (req, res) => {
   const hours = Math.min(168, parseInt(req.query.hours) || 24); // max 7 days
-  const since = new Date(Date.now() - hours * 3600 * 1000).toISOString();
+  const sinceISO = new Date(Date.now() - hours * 3600 * 1000).toISOString();
+  // Convert ISO string `YYYY-MM-DDTHH:mm:ss.sssZ` to SQLite format `YYYY-MM-DD HH:MM:SS`
+  const since = sinceISO.replace('T', ' ').slice(0, 19);
 
   const rows = db.prepare(`
     SELECT
-      strftime('%Y-%m-%dT%H:00:00', timestamp) as hour,
+      strftime('%Y-%m-%d %H:00:00', timestamp) as hour,
       risk_level,
       COUNT(*) as count
     FROM incidents
@@ -59,26 +61,29 @@ router.get('/timeline', authMiddleware, (req, res) => {
   `).all(since);
 
   // Build contiguous hour labels
-  const labels   = [];
-  const now      = new Date();
+  const data = [];
+  const now = new Date();
   for (let i = hours - 1; i >= 0; i--) {
     const d = new Date(now - i * 3600 * 1000);
-    labels.push(d.toISOString().slice(0, 13) + ':00:00');
+    const hourLabel = d.toISOString().replace('T', ' ').slice(0, 13) + ':00:00';
+    data.push({ hour: hourLabel, critical: 0, high: 0, medium: 0, low: 0 });
   }
 
   // Fill data series
-  const series = { critical: {}, high: {}, medium: {}, low: {} };
   for (const row of rows) {
-    if (series[row.risk_level]) series[row.risk_level][row.hour] = row.count;
+    const point = data.find(d => d.hour === row.hour);
+    if (point && point.hasOwnProperty(row.risk_level)) {
+      point[row.risk_level] = row.count;
+    }
   }
 
-  res.json({
-    labels,
-    critical: labels.map(l => series.critical[l] || 0),
-    high:     labels.map(l => series.high[l]     || 0),
-    medium:   labels.map(l => series.medium[l]   || 0),
-    low:      labels.map(l => series.low[l]       || 0),
-  });
+  // Formatting hours to be shorter for the graph like '14:00'
+  const formattedData = data.map(d => ({
+    ...d,
+    hour: d.hour.slice(11, 16)
+  }));
+
+  res.json(formattedData);
 });
 
 module.exports = router;
